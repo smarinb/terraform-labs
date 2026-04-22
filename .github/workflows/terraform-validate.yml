@@ -1,0 +1,77 @@
+name: 🔍 Terraform Validate & Format
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - '**.tf'
+      - '**.tfvars.example'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '**.tf'
+
+jobs:
+  terraform-check:
+    name: Validate Terraform
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v4
+
+      - name: ⚙️ Setup Terraform
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: "~1.0"
+
+      - name: 🔎 Buscar directorios con Terraform
+        id: find-dirs
+        run: |
+          dirs=$(find . -name "*.tf" -not -path "*/.terraform/*" | xargs -I{} dirname {} | sort -u | tr '\n' ' ')
+          echo "dirs=$dirs" >> $GITHUB_OUTPUT
+          echo "Directorios encontrados: $dirs"
+
+      - name: 📐 Terraform Format Check
+        run: |
+          echo "Verificando formato en todos los archivos .tf..."
+          terraform fmt -check -recursive .
+        continue-on-error: false
+
+      - name: ✅ Terraform Validate (por directorio)
+        run: |
+          failed=0
+          for dir in $(find . -name "*.tf" -not -path "*/.terraform/*" | xargs -I{} dirname {} | sort -u); do
+            echo "──────────────────────────────────────"
+            echo "Validando: $dir"
+            cd "$dir"
+            terraform init -backend=false -input=false > /dev/null 2>&1
+            if terraform validate; then
+              echo "✅ OK: $dir"
+            else
+              echo "❌ FALLÓ: $dir"
+              failed=1
+            fi
+            cd - > /dev/null
+          done
+          exit $failed
+
+  tflint:
+    name: TFLint
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Checkout código
+        uses: actions/checkout@v4
+
+      - name: 🔧 Setup TFLint
+        uses: terraform-linters/setup-tflint@v4
+        with:
+          tflint_version: latest
+
+      - name: 🔍 Ejecutar TFLint
+        run: |
+          for dir in $(find . -name "*.tf" -not -path "*/.terraform/*" | xargs -I{} dirname {} | sort -u); do
+            echo "TFLint en: $dir"
+            tflint --chdir="$dir" || true
+          done

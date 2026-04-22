@@ -1,0 +1,31 @@
+# Documentación: https://pre-commit.com/
+# Instalación: pip install pre-commit && pre-commit install
+
+repos:
+  # Hooks generales de calidad
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace        # Elimina espacios al final
+      - id: end-of-file-fixer         # Asegura newline al final
+      - id: check-yaml                 # Valida YAML
+      - id: check-json                 # Valida JSON
+      - id: check-merge-conflict       # Detecta conflictos sin resolver
+      - id: detect-private-key         # ⚠️ Evita commitear claves privadas
+      - id: check-added-large-files    # Bloquea archivos > 500KB
+        args: ['--maxkb=500']
+
+  # Terraform específico
+  - repo: https://github.com/antonbabenko/pre-commit-terraform
+    rev: v1.88.0
+    hooks:
+      - id: terraform_fmt              # Formatea automáticamente
+      - id: terraform_validate         # Valida sintaxis
+      - id: terraform_tflint           # Lint avanzado
+        args:
+          - --args=--minimum-failure-severity=warning
+      - id: terraform_docs             # Genera documentación automática
+        args:
+          - --hook-config=--path-to-file=README.md
+          - --hook-config=--add-to-existing-file=true
+          - --hook-config=--create-file-if-not-exist=true

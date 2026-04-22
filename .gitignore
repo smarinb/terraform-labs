@@ -1,0 +1,52 @@
+# Archivos de estado de Terraform (¡NUNCA commitear!)
+*.tfstate
+*.tfstate.*
+*.tfstate.backup
+
+# Directorio de plugins y cache
+.terraform/
+.terraform.lock.hcl
+
+# Variables con secretos
+*.tfvars
+!*.tfvars.example
+terraform.tfvars
+terraform.tfvars.json
+
+# Archivos de crash
+crash.log
+crash.*.log
+
+# Archivos de override (uso local)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# Archivos generados por terraform-docs
+# (si los generas manualmente, comenta esta línea)
+# docs/
+
+# Credenciales y secretos
+*.pem
+*.key
+.env
+.env.*
+!.env.example
+secrets/
+
+# Archivos del sistema
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.iml
+
+# Logs
+*.log
+logs/
